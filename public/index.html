@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NexaForce — 3D Employee Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ── Three.js Background ─────────────────────── -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- ── Navbar ──────────────────────────────────── -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <div class="nav-logo">
+        <div class="logo-cube">
+          <span>N</span>
+        </div>
+        <div class="logo-text">
+          <span class="logo-title">NexaForce</span>
+          <span class="logo-sub">Employee Hub</span>
+        </div>
+      </div>
+      <div class="nav-links">
+        <a href="#dashboard" class="nav-link active">Dashboard</a>
+        <a href="#employees" class="nav-link">Employees</a>
+        <a href="#" class="nav-link">Reports</a>
+      </div>
+      <button class="btn-add-nav" id="btnAddNav">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Employee
+      </button>
+    </div>
+  </nav>
+
+  <!-- ── Hero ────────────────────────────────────── -->
+  <section class="hero" id="dashboard">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="badge-dot"></span> Live Dashboard
+      </div>
+      <h1 class="hero-title">
+        Manage Your
+        <span class="gradient-text"> Dream Team</span>
+      </h1>
+      <p class="hero-sub">
+        A futuristic 3D command centre for your entire workforce.
+        Hire, track, and grow your people — all in one place.
+      </p>
+      <div class="hero-actions">
+        <button class="btn-primary" id="btnAddHero">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Employee
+        </button>
+        <a href="#employees" class="btn-outline">View All →</a>
+      </div>
+    </div>
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+    <div class="hero-orb hero-orb-3"></div>
+  </section>
+
+  <!-- ── Stats ───────────────────────────────────── -->
+  <section class="stats-section">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-card" data-stat="total">
+          <div class="stat-icon stat-icon-purple">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Total Employees</span>
+            <span class="stat-value" id="statTotal">—</span>
+          </div>
+          <div class="stat-shine"></div>
+        </div>
+        <div class="stat-card" data-stat="active">
+          <div class="stat-icon stat-icon-green">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Active</span>
+            <span class="stat-value" id="statActive">—</span>
+          </div>
+          <div class="stat-shine"></div>
+        </div>
+        <div class="stat-card" data-stat="leave">
+          <div class="stat-icon stat-icon-amber">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">On Leave</span>
+            <span class="stat-value" id="statLeave">—</span>
+          </div>
+          <div class="stat-shine"></div>
+        </div>
+        <div class="stat-card" data-stat="salary">
+          <div class="stat-icon stat-icon-cyan">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Avg. Salary</span>
+            <span class="stat-value" id="statSalary">—</span>
+          </div>
+          <div class="stat-shine"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Controls ────────────────────────────────── -->
+  <section class="controls-section" id="employees">
+    <div class="container">
+      <div class="controls-bar">
+        <div class="search-wrap">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="searchInput" class="search-input" placeholder="Search name, role, email…" />
+        </div>
+        <div class="filter-pills" id="filterPills">
+          <button class="pill active" data-filter="all">All</button>
+          <button class="pill" data-filter="Engineering">Engineering</button>
+          <button class="pill" data-filter="Design">Design</button>
+          <button class="pill" data-filter="Marketing">Marketing</button>
+          <button class="pill" data-filter="Sales">Sales</button>
+          <button class="pill" data-filter="HR">HR</button>
+          <button class="pill" data-filter="Finance">Finance</button>
+          <button class="pill" data-filter="Operations">Operations</button>
+        </div>
+      </div>
+      <div class="results-bar">
+        <span id="resultsCount" class="results-count">Loading…</span>
+        <span class="results-hint">Hover to tilt · Click card to flip</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Employee Grid ────────────────────────────── -->
+  <section class="employees-section">
+    <div class="container">
+      <div id="employeeGrid" class="employee-grid">
+        <!-- Cards injected by app.js -->
+      </div>
+      <div id="emptyState" class="empty-state hidden">
+        <div class="empty-icon">🔍</div>
+        <h3>No employees found</h3>
+        <p>Try adjusting your search or filter.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Add / Edit Modal ─────────────────────────── -->
+  <div class="modal-overlay hidden" id="modalOverlay">
+    <div class="modal-box" id="modalBox">
+      <div class="modal-header">
+        <h2 id="modalTitle">Add Employee</h2>
+        <button class="modal-close" id="modalClose">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <form id="employeeForm" class="modal-form" novalidate>
+        <input type="hidden" id="empId" />
+        <div class="form-row">
+          <div class="form-group">
+            <label for="empName">Full Name <span class="req">*</span></label>
+            <input type="text" id="empName" placeholder="e.g. Alice Chen" required />
+          </div>
+          <div class="form-group">
+            <label for="empEmail">Email <span class="req">*</span></label>
+            <input type="email" id="empEmail" placeholder="alice@corp.io" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="empPhone">Phone <span class="req">*</span></label>
+            <input type="tel" id="empPhone" placeholder="(306) 555-0100" required />
+          </div>
+          <div class="form-group">
+            <label for="empDept">Department <span class="req">*</span></label>
+            <select id="empDept" required>
+              <option value="" disabled selected>Select dept…</option>
+              <option>Engineering</option>
+              <option>Design</option>
+              <option>Marketing</option>
+              <option>Sales</option>
+              <option>HR</option>
+              <option>Finance</option>
+              <option>Operations</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="empPosition">Position <span class="req">*</span></label>
+            <input type="text" id="empPosition" placeholder="e.g. Senior Engineer" required />
+          </div>
+          <div class="form-group">
+            <label for="empSalary">Salary (USD) <span class="req">*</span></label>
+            <input type="number" id="empSalary" placeholder="85000" min="0" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="empStatus">Status</label>
+            <select id="empStatus">
+              <option value="Active">Active</option>
+              <option value="On Leave">On Leave</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="empJoin">Join Date</label>
+            <input type="date" id="empJoin" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" id="btnCancel">Cancel</button>
+          <button type="submit" class="btn-primary" id="btnSave">
+            <span id="btnSaveText">Save Employee</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── Delete Modal ─────────────────────────────── -->
+  <div class="modal-overlay hidden" id="deleteOverlay">
+    <div class="modal-box modal-sm" id="deleteBox">
+      <div class="delete-icon-wrap">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      </div>
+      <h2>Delete Employee?</h2>
+      <p id="deleteMsg">This action cannot be undone.</p>
+      <div class="delete-actions">
+        <button class="btn-cancel" id="btnDeleteCancel">Cancel</button>
+        <button class="btn-danger" id="btnDeleteConfirm">Yes, Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Toast ────────────────────────────────────── -->
+  <div class="toast hidden" id="toast">
+    <span class="toast-icon" id="toastIcon"></span>
+    <span id="toastMsg"></span>
+  </div>
+
+  <!-- ── Scripts ──────────────────────────────────── -->
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
