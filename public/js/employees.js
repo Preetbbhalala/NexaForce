@@ -47,6 +47,7 @@ var state = {
   view:      'card',
   editingId: null,
   deleteId:  null,
+  selected:  new Set(),
 };
 
 // ── Toast ─────────────────────────────────────────────────────
@@ -74,6 +75,119 @@ function populateSidebar() {
   document.getElementById('sidebarRole').textContent   = user.role || 'admin';
 }
 
+// ── Status cycle helper ───────────────────────────────────────
+var STATUS_CYCLE = ['Active', 'On Leave', 'Inactive'];
+function nextStatus(current) {
+  var idx = STATUS_CYCLE.indexOf(current);
+  return STATUS_CYCLE[(idx + 1) % STATUS_CYCLE.length];
+}
+
+async function toggleStatus(emp, wrapper) {
+  var newStatus = nextStatus(emp.status);
+  try {
+    await API.updateEmployee(emp._id, { status: newStatus });
+    emp.status = newStatus;
+    var ss = STATUS_STYLES[newStatus] || STATUS_STYLES['Active'];
+    var dot   = wrapper.querySelector('.status-dot');
+    var label = wrapper.querySelector('.status-label-text');
+    if (dot)   { dot.style.background = ss.dot; dot.style.boxShadow = '0 0 6px ' + ss.dot; }
+    if (label) { label.textContent = newStatus; label.style.color = ss.text; }
+    showToast(emp.name + ' → ' + newStatus, 'success');
+  } catch (err) {
+    showToast('Failed to update status: ' + err.message, 'error');
+  }
+}
+
+// ── Bulk selection helpers ────────────────────────────────────
+function updateBulkToolbar() {
+  var toolbar = document.getElementById('bulkToolbar');
+  if (!toolbar) return;
+  var count = state.selected.size;
+  if (count > 0) {
+    toolbar.classList.add('visible');
+    document.getElementById('bulkCount').textContent = count + ' selected';
+  } else {
+    toolbar.classList.remove('visible');
+  }
+}
+
+function clearSelection() {
+  state.selected.clear();
+  document.querySelectorAll('.card-wrapper.selected').forEach(function(w) {
+    w.classList.remove('selected');
+  });
+  updateBulkToolbar();
+}
+
+// ── CSV Export ────────────────────────────────────────────────
+function exportCSV() {
+  var rows = [['Name','Email','Phone','Department','Position','Status','Salary','Joined']];
+  state.employees.forEach(function(e) {
+    rows.push([
+      e.name, e.email, e.phone || '',
+      e.department, e.position, e.status,
+      e.salary || 0,
+      e.joinDate ? new Date(e.joinDate).toLocaleDateString('en-CA') : '',
+    ]);
+  });
+  var csv = rows.map(function(r) {
+    return r.map(function(cell) {
+      var s = String(cell);
+      if (s.includes(',') || s.includes('"') || s.includes('\n')) s = '"' + s.replace(/"/g, '""') + '"';
+      return s;
+    }).join(',');
+  }).join('\r\n');
+
+  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  a.href   = url;
+  a.download = 'nexaforce-employees-' + new Date().toISOString().slice(0,10) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Exported ' + state.employees.length + ' employees to CSV', 'success');
+}
+
+// ── Context Menu ──────────────────────────────────────────────
+var _ctxMenu = null;
+function showContextMenu(e, emp, wrapper) {
+  e.preventDefault();
+  hideContextMenu();
+  _ctxMenu = document.createElement('div');
+  _ctxMenu.className = 'ctx-menu';
+  _ctxMenu.innerHTML =
+    '<div class="ctx-item" id="ctxEdit"><span>✏️</span> Edit Employee</div>' +
+    '<div class="ctx-item" id="ctxStatus"><span>🔄</span> Toggle Status <small style="color:var(--text-muted);margin-left:4px;">→ ' + nextStatus(emp.status) + '</small></div>' +
+    '<div class="ctx-item" id="ctxCopyEmail"><span>📋</span> Copy Email</div>' +
+    '<div class="ctx-sep"></div>' +
+    '<div class="ctx-item ctx-danger" id="ctxDelete"><span>🗑️</span> Delete</div>';
+
+  document.body.appendChild(_ctxMenu);
+
+  var x = e.clientX, y = e.clientY;
+  var mw = _ctxMenu.offsetWidth  || 180;
+  var mh = _ctxMenu.offsetHeight || 160;
+  if (x + mw > window.innerWidth)  x = window.innerWidth  - mw - 8;
+  if (y + mh > window.innerHeight) y = window.innerHeight - mh - 8;
+  _ctxMenu.style.left = x + 'px';
+  _ctxMenu.style.top  = y + 'px';
+
+  _ctxMenu.querySelector('#ctxEdit').addEventListener('click', function() { hideContextMenu(); openEditModal(emp); });
+  _ctxMenu.querySelector('#ctxStatus').addEventListener('click', function() { hideContextMenu(); toggleStatus(emp, wrapper); });
+  _ctxMenu.querySelector('#ctxCopyEmail').addEventListener('click', function() {
+    hideContextMenu();
+    navigator.clipboard.writeText(emp.email).then(function() {
+      showToast('Copied ' + emp.email, 'success');
+    }).catch(function() { showToast(emp.email, 'info'); });
+  });
+  _ctxMenu.querySelector('#ctxDelete').addEventListener('click', function() { hideContextMenu(); openDeleteModal(emp._id, emp.name); });
+}
+function hideContextMenu() {
+  if (_ctxMenu) { _ctxMenu.remove(); _ctxMenu = null; }
+}
+
 // ── Build 3D flip card ────────────────────────────────────────
 function buildCard(emp, index) {
   var dc   = deptColor(emp.department);
@@ -89,6 +203,7 @@ function buildCard(emp, index) {
   wrapper.style.animationDelay = (index * 0.05) + 's';
 
   wrapper.innerHTML =
+    '<div class="card-checkbox" title="Select"></div>' +
     '<div class="card-inner">' +
 
     // FRONT
@@ -105,8 +220,11 @@ function buildCard(emp, index) {
       '<div class="emp-position">' + emp.position + '</div>' +
       '<span class="badge badge-' + emp.department + '">' + emp.department + '</span>' +
       '<div class="status-row">' +
-        '<span class="status-dot" style="background:' + ss.dot + ';box-shadow:0 0 6px ' + ss.dot + '"></span>' +
-        '<span style="color:' + ss.text + '">' + emp.status + '</span>' +
+        '<button class="status-toggle-btn" title="Click to cycle status" data-tip="Click to toggle status">' +
+          '<span class="status-dot" style="background:' + ss.dot + ';box-shadow:0 0 6px ' + ss.dot + '"></span>' +
+          '<span class="status-label-text" style="color:' + ss.text + '">' + emp.status + '</span>' +
+          '<span class="toggle-hint">↺</span>' +
+        '</button>' +
       '</div>' +
       '<div class="card-quick">' +
         '<div class="quick-item"><span class="q-label">Since</span><span class="q-val">' + year + '</span></div>' +
@@ -135,6 +253,30 @@ function buildCard(emp, index) {
     '</div>' +
 
     '</div>';
+
+  // Checkbox toggle
+  wrapper.querySelector('.card-checkbox').addEventListener('click', function(e) {
+    e.stopPropagation();
+    if (state.selected.has(emp._id)) {
+      state.selected.delete(emp._id);
+      wrapper.classList.remove('selected');
+    } else {
+      state.selected.add(emp._id);
+      wrapper.classList.add('selected');
+    }
+    updateBulkToolbar();
+  });
+
+  // Status toggle click
+  wrapper.querySelector('.status-toggle-btn').addEventListener('click', function(e) {
+    e.stopPropagation();
+    toggleStatus(emp, wrapper);
+  });
+
+  // Right-click context menu
+  wrapper.addEventListener('contextmenu', function(e) {
+    showContextMenu(e, emp, wrapper);
+  });
 
   // 3D tilt
   wrapper.addEventListener('mousemove', function (e) {
@@ -177,7 +319,6 @@ function buildCard(emp, index) {
 // ── Build table row ───────────────────────────────────────────
 function buildTableRow(emp) {
   var dc     = deptColor(emp.department);
-  var ss     = STATUS_STYLES[emp.status] || STATUS_STYLES['Active'];
   var ini    = initials(emp.name);
   var statusBadgeClass = emp.status === 'Active' ? 'badge-active' : emp.status === 'Inactive' ? 'badge-inactive' : 'badge-onleave';
   var sal    = '$' + (emp.salary || 0).toLocaleString();
@@ -448,8 +589,69 @@ document.getElementById('btnLogout').addEventListener('click', function () {
   window.location.href = 'index.html';
 });
 
+// ── CSV Export button ─────────────────────────────────────────
+var btnExport = document.getElementById('btnExportCSV');
+if (btnExport) btnExport.addEventListener('click', exportCSV);
+
+// ── Bulk toolbar actions ──────────────────────────────────────
+var bulkToolbar = document.getElementById('bulkToolbar');
+if (bulkToolbar) {
+  document.getElementById('bulkBtnDeselect').addEventListener('click', clearSelection);
+
+  document.getElementById('bulkBtnStatus').addEventListener('click', async function () {
+    if (!state.selected.size) return;
+    var ids = Array.from(state.selected);
+    var btn = this;
+    btn.disabled = true;
+    try {
+      for (var i = 0; i < ids.length; i++) {
+        var emp = state.employees.find(function(e) { return e._id === ids[i]; });
+        if (emp) await API.updateEmployee(emp._id, { status: nextStatus(emp.status) });
+      }
+      showToast('Updated ' + ids.length + ' employees', 'success');
+      clearSelection();
+      loadEmployees();
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  document.getElementById('bulkBtnDelete').addEventListener('click', async function () {
+    if (!state.selected.size) return;
+    if (!confirm('Delete ' + state.selected.size + ' selected employees? This cannot be undone.')) return;
+    var ids = Array.from(state.selected);
+    var btn = this;
+    btn.disabled = true;
+    try {
+      for (var i = 0; i < ids.length; i++) {
+        await API.deleteEmployee(ids[i]);
+      }
+      showToast('Deleted ' + ids.length + ' employees', 'success');
+      clearSelection();
+      loadEmployees();
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+}
+
+// ── Hide context menu on click outside ───────────────────────
+document.addEventListener('click', hideContextMenu);
+
 // ── Init ──────────────────────────────────────────────────────
 (function init() {
   populateSidebar();
   loadEmployees();
+
+  // Handle ?status= query param from dashboard stat card click
+  var params = new URLSearchParams(window.location.search);
+  var statusFilter = params.get('status');
+  if (statusFilter) {
+    document.getElementById('searchInput').value = statusFilter;
+    state.search = statusFilter;
+  }
 })();

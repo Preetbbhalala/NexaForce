@@ -290,8 +290,6 @@ function renderActivity(activities) {
     var validDots = ['hired', 'updated', 'terminated'];
     if (!validDots.includes(a.action)) dotClass = 'dot-default';
 
-    var actionLabel = a.action ? (a.action.charAt(0).toUpperCase() + a.action.slice(1)) : 'Action';
-
     return '<div class="activity-item">' +
       '<span class="activity-dot ' + dotClass + '"></span>' +
       '<div class="activity-content">' +
@@ -328,6 +326,42 @@ document.getElementById('btnLogout').addEventListener('click', function () {
   window.location.href = 'index.html';
 });
 
+// ── Clickable stat cards ──────────────────────────────────────
+function initClickableStats() {
+  var cardMap = {
+    'statCardTotal':  'employees.html',
+    'statCardActive': 'employees.html?status=Active',
+    'statCardLeave':  'employees.html?status=On+Leave',
+  };
+  Object.keys(cardMap).forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('click', function() {
+      window.location.href = cardMap[id];
+    });
+  });
+}
+
+// ── Quick action buttons ──────────────────────────────────────
+function initQuickActions() {
+  var addBtn = document.getElementById('qaBtnAddEmp');
+  if (addBtn) addBtn.addEventListener('click', function() {
+    window.location.href = 'employees.html';
+    sessionStorage.setItem('nx_openAdd', '1');
+  });
+  var palBtn = document.getElementById('qaBtnPalette');
+  if (palBtn) palBtn.addEventListener('click', function() {
+    if (typeof CommandPalette !== 'undefined') CommandPalette.open();
+  });
+}
+
+// ── Auto-refresh data every 30s ───────────────────────────────
+async function refreshAll() {
+  if (typeof LoadingBar !== 'undefined') LoadingBar.start();
+  await Promise.all([loadStats(), loadAnalytics()]).catch(function() {});
+  if (typeof LoadingBar !== 'undefined') LoadingBar.done();
+}
+
 // ── Init ──────────────────────────────────────────────────────
 (function init() {
   populateSidebar();
@@ -335,4 +369,27 @@ document.getElementById('btnLogout').addEventListener('click', function () {
   loadStats();
   loadAnalytics();
   initThreeJS('bg-canvas', 0.3);
+  initClickableStats();
+  initQuickActions();
+
+  // Hook LoadingBar into initial loads
+  if (typeof LoadingBar !== 'undefined') LoadingBar.start();
+  Promise.all([
+    API.getStats(),
+    API.getAnalytics(),
+  ]).catch(function(){}).finally(function() {
+    if (typeof LoadingBar !== 'undefined') LoadingBar.done();
+  });
+
+  // Auto-refresh setup (delegated to interactions.js initAutoRefresh when loaded)
+  var _refreshCount = 30;
+  setInterval(function() {
+    _refreshCount--;
+    var el = document.getElementById('nxRefreshCount');
+    if (el) el.textContent = _refreshCount;
+    if (_refreshCount <= 0) {
+      _refreshCount = 30;
+      refreshAll();
+    }
+  }, 1000);
 })();

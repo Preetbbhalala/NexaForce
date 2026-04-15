@@ -66,21 +66,50 @@
       <div class="topbar-left">
         <h1 class="topbar-title">Dashboard</h1>
         <span class="topbar-greeting">Good <span id="greeting">morning</span>, <span id="topbarName">Admin</span></span>
+        <span id="liveClock"></span>
+        <div class="refresh-badge">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          <span id="nxRefreshCount">30</span>s
+        </div>
       </div>
       <div class="topbar-right">
-        <button class="topbar-icon-btn" title="Notifications">
+        <button class="topbar-icon-btn" id="notifBtn" title="Notifications" data-tip="Recent Activity">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         </button>
-        <div class="user-avatar-sm" id="topbarAvatar">A</div>
-      </div>
+        <div class="user-avatar-sm" id="topbarAvatar" data-tip="Logged in as Admin">A</div>
+       </div>
     </header>
 
     <!-- Page Content -->
     <main class="page-content">
 
+      <!-- Quick Actions -->
+      <div class="quick-actions">
+        <a href="employees.html" class="quick-action-btn" data-tip="Manage your team">
+          <span class="quick-action-icon" style="background:rgba(124,58,237,0.2);">👥</span>
+          Employees
+        </a>
+        <a href="analytics.html" class="quick-action-btn" data-tip="View charts & KPIs">
+          <span class="quick-action-icon" style="background:rgba(6,182,212,0.2);">📊</span>
+          Analytics
+        </a>
+        <a href="news.html" class="quick-action-btn" data-tip="Business news feed">
+          <span class="quick-action-icon" style="background:rgba(236,72,153,0.2);">📰</span>
+          News
+        </a>
+        <button class="quick-action-btn" id="qaBtnAddEmp" data-tip="Add a new team member  (Ctrl+K → Add)">
+          <span class="quick-action-icon" style="background:rgba(16,185,129,0.2);">➕</span>
+          Add Employee
+        </button>
+        <button class="quick-action-btn" id="qaBtnPalette" data-tip="Open command palette  Ctrl+K">
+          <span class="quick-action-icon" style="background:rgba(245,158,11,0.2);">⌘</span>
+          Commands
+        </button>
+      </div>
+
       <!-- Stats Row -->
       <div class="stats-grid" id="statsGrid">
-        <div class="stat-card">
+        <div class="stat-card clickable" id="statCardTotal" data-tip="Click to view all employees" style="position:relative;">
           <div class="stat-icon stat-icon-purple">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           </div>
@@ -88,8 +117,9 @@
             <span class="stat-label">Total Employees</span>
             <span class="stat-value" id="statTotal">—</span>
           </div>
+          <span class="stat-arrow">→</span>
         </div>
-        <div class="stat-card">
+        <div class="stat-card clickable" id="statCardActive" data-tip="Click to filter active employees" style="position:relative;">
           <div class="stat-icon stat-icon-green">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
           </div>
@@ -97,8 +127,9 @@
             <span class="stat-label">Active</span>
             <span class="stat-value" id="statActive">—</span>
           </div>
+          <span class="stat-arrow">→</span>
         </div>
-        <div class="stat-card">
+        <div class="stat-card clickable" id="statCardLeave" data-tip="Click to see employees on leave" style="position:relative;">
           <div class="stat-icon stat-icon-amber">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           </div>
@@ -106,8 +137,9 @@
             <span class="stat-label">On Leave</span>
             <span class="stat-value" id="statLeave">—</span>
           </div>
+          <span class="stat-arrow">→</span>
         </div>
-        <div class="stat-card">
+        <div class="stat-card" data-tip="Average annual salary across all employees" style="position:relative;">
           <div class="stat-icon stat-icon-cyan">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           </div>
@@ -166,5 +198,6 @@
   <script src="js/api.js"></script>
   <script src="js/three-bg.js"></script>
   <script src="js/dashboard.js"></script>
+  <script src="js/interactions.js"></script>
 </body>
 </html>
