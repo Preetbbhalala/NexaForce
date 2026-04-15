@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NexaForce — Settings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body class="app-layout">
+
+  <!-- ── Sidebar ─────────────────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-cube">N</div>
+      <div class="logo-text-wrap">
+        <span class="logo-name">NexaForce</span>
+        <span class="logo-sub">Employee Hub</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a href="employees.html" class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Employees
+      </a>
+      <a href="analytics.html" class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Analytics
+      </a>
+      <a href="news.html" class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8z"/></svg>
+        News
+      </a>
+      <a href="settings.html" class="nav-item active">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="sidebar-user">
+        <div class="user-avatar-sm" id="sidebarAvatar">A</div>
+        <div class="user-info">
+          <span class="user-name" id="sidebarName">Admin</span>
+          <span class="user-role" id="sidebarRole">admin</span>
+        </div>
+      </div>
+      <button class="btn-logout" id="btnLogout">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── Main Content ────────────────────────────── -->
+  <div class="main-content">
+
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 class="topbar-title">Settings</h1>
+      </div>
+    </header>
+
+    <main class="page-content">
+
+      <!-- Tab Bar -->
+      <div class="settings-tabs">
+        <button class="settings-tab active" data-tab="profile">Profile</button>
+        <button class="settings-tab" data-tab="security">Security</button>
+        <button class="settings-tab" data-tab="audit">Audit Log</button>
+      </div>
+
+      <!-- ── Profile Panel ── -->
+      <div class="settings-panel active" id="panel-profile">
+        <div class="settings-card">
+          <h3>Profile Information</h3>
+
+          <div class="profile-avatar-wrap">
+            <div class="profile-avatar" id="profileAvatar">A</div>
+            <div class="profile-meta">
+              <span class="meta-name"  id="profileName">Admin</span>
+              <span class="meta-email" id="profileEmail">admin@nexaforce.com</span>
+              <span class="meta-last"  id="profileLastLogin">Last login: —</span>
+            </div>
+          </div>
+
+          <form id="profileForm" novalidate>
+            <div class="form-row" style="margin-bottom: 20px;">
+              <div class="form-group">
+                <label for="profileNameInput">Display Name</label>
+                <input type="text" id="profileNameInput" placeholder="Your name" />
+              </div>
+              <div class="form-group">
+                <label for="profileEmailInput">Email Address</label>
+                <input type="email" id="profileEmailInput" placeholder="admin@nexaforce.com" readonly style="opacity:0.6; cursor:not-allowed;" />
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom: 20px;">
+              <label>Role</label>
+              <div>
+                <span class="badge badge-active" id="profileRoleBadge" style="font-size:13px; padding: 5px 14px;">admin</span>
+              </div>
+            </div>
+            <button type="submit" class="btn-primary">Save Profile</button>
+          </form>
+        </div>
+
+        <div class="settings-card">
+          <h3>Account Info</h3>
+          <div style="display: flex; flex-direction: column; gap: 14px; color: var(--text-secondary); font-size: 13.5px;">
+            <div style="display:flex; justify-content:space-between;">
+              <span>JWT Token expiry</span>
+              <span style="color: var(--purple-light); font-weight: 600;">7 days</span>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+              <span>Account created</span>
+              <span id="accountCreated" style="color: var(--text-primary);">—</span>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+              <span>Last login</span>
+              <span id="accountLastLogin" style="color: var(--text-primary);">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Security Panel ── -->
+      <div class="settings-panel" id="panel-security">
+        <div class="settings-card">
+          <h3>Change Password</h3>
+          <form id="passwordForm" novalidate style="display: flex; flex-direction: column; gap: 18px;">
+            <div class="form-group">
+              <label for="currentPw">Current Password</label>
+              <input type="password" id="currentPw" placeholder="Enter current password" />
+            </div>
+            <div class="form-group">
+              <label for="newPw">New Password</label>
+              <input type="password" id="newPw" placeholder="Min. 6 characters" />
+              <div class="strength-bar">
+                <div class="strength-fill" id="strengthFill" style="width:0%; background: var(--red);"></div>
+              </div>
+              <div class="strength-label" id="strengthLabel">Enter a new password</div>
+            </div>
+            <div class="form-group">
+              <label for="confirmPw">Confirm New Password</label>
+              <input type="password" id="confirmPw" placeholder="Repeat new password" />
+            </div>
+            <div style="display:flex; align-items:center; gap: 16px; flex-wrap: wrap;">
+              <button type="submit" class="btn-primary" id="btnChangePw">
+                <span id="btnChangePwText">Update Password</span>
+              </button>
+              <span style="font-size:12px; color: var(--text-muted);">
+                <svg width="12" height="12" style="vertical-align:middle;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                New token issued on password change
+              </span>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ── Audit Log Panel ── -->
+      <div class="settings-panel" id="panel-audit">
+        <div class="table-card">
+          <div class="table-header">
+            <span class="table-header-title">Audit Log</span>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Action</th>
+                <th>Employee</th>
+                <th>Performed By</th>
+                <th>Details</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="auditTbody">
+              <tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 32px;">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast hidden" id="toast">
+    <span class="toast-icon" id="toastIcon"></span>
+    <span id="toastMsg"></span>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/settings.js"></script>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NexaForce — Analytics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body class="app-layout">
+
+  <!-- ── Sidebar ─────────────────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-cube">N</div>
+      <div class="logo-text-wrap">
+        <span class="logo-name">NexaForce</span>
+        <span class="logo-sub">Employee Hub</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a href="employees.html" class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Employees
+      </a>
+      <a href="analytics.html" class="nav-item active">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Analytics
+      </a>
+      <a href="news.html" class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8z"/></svg>
+        News
+      </a>
+      <a href="settings.html" class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="sidebar-user">
+        <div class="user-avatar-sm" id="sidebarAvatar">A</div>
+        <div class="user-info">
+          <span class="user-name" id="sidebarName">Admin</span>
+          <span class="user-role" id="sidebarRole">admin</span>
+        </div>
+      </div>
+      <button class="btn-logout" id="btnLogout">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── Main Content ────────────────────────────── -->
+  <div class="main-content">
+
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 class="topbar-title">Analytics</h1>
+      </div>
+    </header>
+
+    <main class="page-content">
+
+      <!-- KPI Cards -->
+      <div class="kpi-grid" id="kpiGrid">
+        <div class="kpi-card kpi-purple">
+          <div class="kpi-label">Total Payroll</div>
+          <div class="kpi-value" id="kpiPayroll">—</div>
+          <div class="kpi-sub">Annual gross payroll</div>
+        </div>
+        <div class="kpi-card kpi-cyan">
+          <div class="kpi-label">Highest Paid Dept</div>
+          <div class="kpi-value" id="kpiHighDept">—</div>
+          <div class="kpi-sub" id="kpiHighDeptSub">by avg salary</div>
+        </div>
+        <div class="kpi-card kpi-green">
+          <div class="kpi-label">Largest Department</div>
+          <div class="kpi-value" id="kpiLargeDept">—</div>
+          <div class="kpi-sub" id="kpiLargeDeptSub">by headcount</div>
+        </div>
+      </div>
+
+      <!-- Charts Row 1 -->
+      <div class="charts-grid-2-equal">
+        <div class="chart-card">
+          <div class="chart-card-title">Avg Salary by Department</div>
+          <canvas id="salaryByDeptChart" height="260"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="chart-card-title">Headcount by Department</div>
+          <canvas id="headcountChart" height="260"></canvas>
+        </div>
+      </div>
+
+      <!-- Charts Row 2 -->
+      <div class="charts-grid-2-equal">
+        <div class="chart-card">
+          <div class="chart-card-title">Monthly Hiring Trend (Last 12 Months)</div>
+          <canvas id="trendChart" height="240"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="chart-card-title">Salary Distribution</div>
+          <canvas id="salaryDistChart" height="240"></canvas>
+        </div>
+      </div>
+
+      <!-- Department Table -->
+      <div class="table-card">
+        <div class="table-header">
+          <span class="table-header-title">Department Overview</span>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Department</th>
+              <th>Headcount</th>
+              <th>Avg Salary</th>
+              <th>% of Workforce</th>
+            </tr>
+          </thead>
+          <tbody id="deptTableBody"></tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast hidden" id="toast">
+    <span class="toast-icon" id="toastIcon"></span>
+    <span id="toastMsg"></span>
+  </div>
+
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/three-bg.js"></script>
+  <script src="js/analytics.js"></script>
+</body>
+</html>
