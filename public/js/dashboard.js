@@ -7,9 +7,23 @@
 Auth.guard();
 
 // ── Chart.js global dark theme ────────────────────────────────
-Chart.defaults.color        = '#94a3b8';
-Chart.defaults.borderColor  = 'rgba(255,255,255,0.08)';
+Chart.defaults.color        = '#64748b';
+Chart.defaults.borderColor  = 'rgba(255,255,255,0.05)';
 Chart.defaults.font.family  = 'Poppins, system-ui, sans-serif';
+Chart.defaults.font.size    = 11;
+
+// Shared tooltip style
+var TOOLTIP_STYLE = {
+  backgroundColor: 'rgba(7,7,22,0.97)',
+  titleColor:      '#f1f5f9',
+  bodyColor:       '#94a3b8',
+  borderColor:     'rgba(124,58,237,0.4)',
+  borderWidth:     1,
+  cornerRadius:    10,
+  padding:         12,
+  displayColors:   false,
+  callbacks: {},
+};
 
 // ── Department colours ────────────────────────────────────────
 const DEPT_COLORS = {
@@ -111,15 +125,19 @@ async function loadStats() {
 
 // ── Render growth chart ───────────────────────────────────────
 function renderGrowthChart(monthlyHires, total) {
-  // Build last-12-month labels
   var labels = [];
   var now    = new Date();
   for (var i = 11; i >= 0; i--) {
     var d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    labels.push(d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }));
+    labels.push(d.toLocaleDateString('en-US', { month: 'short' }));
   }
 
-  // Map hires to months
+  var fullLabels = [];
+  for (var i = 11; i >= 0; i--) {
+    var d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    fullLabels.push(d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }));
+  }
+
   var hiresMap = {};
   (monthlyHires || []).forEach(function (m) {
     var key = new Date(m._id.year, m._id.month - 1, 1)
@@ -127,53 +145,109 @@ function renderGrowthChart(monthlyHires, total) {
     hiresMap[key] = m.count;
   });
 
-  // Compute cumulative headcount
-  var totalHiresLast12 = labels.reduce(function (sum, l) { return sum + (hiresMap[l] || 0); }, 0);
+  var totalHiresLast12 = fullLabels.reduce(function (sum, l) { return sum + (hiresMap[l] || 0); }, 0);
   var base = (total || 0) - totalHiresLast12;
   var data = [];
-  labels.forEach(function (l) {
-    base += (hiresMap[l] || 0);
+  var hireData = [];
+  fullLabels.forEach(function (l) {
+    var hires = hiresMap[l] || 0;
+    base += hires;
     data.push(base);
+    hireData.push(hires);
   });
 
-  var ctx = document.getElementById('growthChart').getContext('2d');
-  var grad = ctx.createLinearGradient(0, 0, 0, 220);
-  grad.addColorStop(0, 'rgba(124,58,237,0.3)');
-  grad.addColorStop(1, 'rgba(124,58,237,0)');
+  var ctx  = document.getElementById('growthChart').getContext('2d');
+  var grad = ctx.createLinearGradient(0, 0, 0, 260);
+  grad.addColorStop(0,   'rgba(124,58,237,0.35)');
+  grad.addColorStop(0.5, 'rgba(124,58,237,0.12)');
+  grad.addColorStop(1,   'rgba(124,58,237,0.0)');
+
+  var grad2 = ctx.createLinearGradient(0, 0, 0, 260);
+  grad2.addColorStop(0,   'rgba(6,182,212,0.3)');
+  grad2.addColorStop(0.5, 'rgba(6,182,212,0.08)');
+  grad2.addColorStop(1,   'rgba(6,182,212,0.0)');
 
   new Chart(ctx, {
     type: 'line',
     data: {
       labels: labels,
-      datasets: [{
-        label:           'Headcount',
-        data:            data,
-        borderColor:     '#7c3aed',
-        backgroundColor: grad,
-        borderWidth:     2,
-        fill:            true,
-        tension:         0.4,
-        pointRadius:     4,
-        pointBackgroundColor: '#7c3aed',
-        pointBorderColor:     '#0d0d2b',
-        pointBorderWidth:     2,
-      }],
+      datasets: [
+        {
+          label:               'Headcount',
+          data:                data,
+          borderColor:         '#8b5cf6',
+          backgroundColor:     grad,
+          borderWidth:         2.5,
+          fill:                true,
+          tension:             0.45,
+          pointRadius:         0,
+          pointHoverRadius:    6,
+          pointHoverBackgroundColor: '#8b5cf6',
+          pointHoverBorderColor:     '#0d0d2b',
+          pointHoverBorderWidth:     2,
+          yAxisID: 'y',
+        },
+        {
+          label:               'New Hires',
+          data:                hireData,
+          borderColor:         '#06b6d4',
+          backgroundColor:     grad2,
+          borderWidth:         2,
+          fill:                true,
+          tension:             0.45,
+          pointRadius:         0,
+          pointHoverRadius:    5,
+          pointHoverBackgroundColor: '#06b6d4',
+          yAxisID: 'y2',
+          borderDash:          [4, 3],
+        },
+      ],
     },
     options: {
       responsive: true,
+      interaction: { mode: 'index', intersect: false },
       plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: 'rgba(13,13,43,0.95)',
-          titleColor:      '#f1f5f9',
-          bodyColor:       '#94a3b8',
-          borderColor:     'rgba(124,58,237,0.3)',
-          borderWidth:     1,
+        legend: {
+          display: true,
+          position: 'top',
+          align: 'end',
+          labels: {
+            color: '#64748b',
+            font: { size: 11 },
+            usePointStyle: true,
+            pointStyleWidth: 8,
+            boxHeight: 6,
+            padding: 16,
+          },
         },
+        tooltip: Object.assign({}, TOOLTIP_STYLE, {
+          callbacks: {
+            title: function(items) { return fullLabels[items[0].dataIndex]; },
+            label: function(item) {
+              if (item.datasetIndex === 0) return '  Total: ' + item.parsed.y + ' employees';
+              return '  Hired: +' + item.parsed.y;
+            },
+          }
+        }),
       },
       scales: {
-        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { maxRotation: 45, font: { size: 11 } } },
-        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { stepSize: 1 } },
+        x: {
+          grid: { color: 'rgba(255,255,255,0.03)', drawTicks: false },
+          border: { display: false },
+          ticks: { color: '#475569', font: { size: 10 }, maxRotation: 0 },
+        },
+        y: {
+          position: 'left',
+          grid: { color: 'rgba(255,255,255,0.04)', drawTicks: false },
+          border: { display: false },
+          ticks: { color: '#475569', font: { size: 10 }, padding: 8, stepSize: 1 },
+        },
+        y2: {
+          position: 'right',
+          grid: { display: false },
+          border: { display: false },
+          ticks: { color: '#06b6d4', font: { size: 10 }, padding: 8, stepSize: 1 },
+        },
       },
     },
   });
@@ -189,29 +263,58 @@ function renderDeptChart(byDept) {
   new Chart(ctx, {
     type: 'doughnut',
     data: {
-      labels:   labels,
+      labels: labels,
       datasets: [{
         data:            data,
-        backgroundColor: colors.map(function (c) { return c + 'cc'; }),
-        borderColor:     colors,
+        backgroundColor: colors.map(function (c) { return c + 'bb'; }),
+        borderColor:     colors.map(function (c) { return c; }),
         borderWidth:     2,
-        hoverOffset:     8,
+        hoverOffset:     12,
+        hoverBorderWidth: 3,
       }],
     },
     options: {
       responsive: true,
-      cutout: '65%',
+      cutout: '72%',
+      animation: { animateRotate: true, duration: 1000, easing: 'easeInOutQuart' },
       plugins: {
-        legend: { position: 'bottom', labels: { padding: 14, font: { size: 12 }, boxWidth: 12 } },
-        tooltip: {
-          backgroundColor: 'rgba(13,13,43,0.95)',
-          titleColor:      '#f1f5f9',
-          bodyColor:       '#94a3b8',
-          borderColor:     'rgba(255,255,255,0.1)',
-          borderWidth:     1,
+        legend: {
+          position: 'bottom',
+          labels: {
+            padding: 12,
+            font: { size: 11 },
+            usePointStyle: true,
+            pointStyleWidth: 8,
+            boxHeight: 7,
+            color: '#64748b',
+          },
         },
+        tooltip: Object.assign({}, TOOLTIP_STYLE, {
+          callbacks: {
+            label: function(item) { return '  ' + item.label + ': ' + item.parsed + ' employees'; }
+          }
+        }),
       },
     },
+    plugins: [{
+      id: 'centerLabel',
+      afterDraw: function(chart) {
+        var total = chart.data.datasets[0].data.reduce(function(a,b){return a+b;},0);
+        var ctx2  = chart.ctx;
+        var cx    = chart.chartArea.left + (chart.chartArea.right  - chart.chartArea.left) / 2;
+        var cy    = chart.chartArea.top  + (chart.chartArea.bottom - chart.chartArea.top)  / 2;
+        ctx2.save();
+        ctx2.font = 'bold 22px Poppins, sans-serif';
+        ctx2.fillStyle = '#f1f5f9';
+        ctx2.textAlign = 'center';
+        ctx2.textBaseline = 'middle';
+        ctx2.fillText(total, cx, cy - 8);
+        ctx2.font = '11px Poppins, sans-serif';
+        ctx2.fillStyle = '#475569';
+        ctx2.fillText('employees', cx, cy + 12);
+        ctx2.restore();
+      }
+    }],
   });
 }
 
@@ -221,38 +324,54 @@ function renderStatusChart(byStatus) {
   (byStatus || []).forEach(function (s) { map[s._id] = s.count; });
   var labels = ['Active', 'On Leave', 'Inactive'];
   var data   = [map['Active'] || 0, map['On Leave'] || 0, map['Inactive'] || 0];
-  var colors = ['rgba(16,185,129,0.7)', 'rgba(245,158,11,0.7)', 'rgba(239,68,68,0.7)'];
+  var total  = data.reduce(function(a,b){return a+b;},0);
 
   var ctx = document.getElementById('statusChart').getContext('2d');
+
   new Chart(ctx, {
     type: 'bar',
     data: {
-      labels:   labels,
+      labels: labels,
       datasets: [{
         label:           'Employees',
         data:            data,
-        backgroundColor: colors,
-        borderColor:     colors.map(function (c) { return c.replace('0.7', '1'); }),
-        borderWidth:     1,
-        borderRadius:    6,
+        backgroundColor: [
+          'rgba(16,185,129,0.75)',
+          'rgba(245,158,11,0.75)',
+          'rgba(239,68,68,0.75)',
+        ],
+        borderColor: ['#10b981','#f59e0b','#ef4444'],
+        borderWidth: 0,
+        borderRadius: { topRight: 8, bottomRight: 8 },
+        borderSkipped: false,
       }],
     },
     options: {
       indexAxis: 'y',
       responsive: true,
+      animation: { duration: 900, easing: 'easeOutQuart' },
       plugins: {
         legend: { display: false },
-        tooltip: {
-          backgroundColor: 'rgba(13,13,43,0.95)',
-          titleColor: '#f1f5f9',
-          bodyColor:  '#94a3b8',
-          borderColor: 'rgba(255,255,255,0.1)',
-          borderWidth: 1,
-        },
+        tooltip: Object.assign({}, TOOLTIP_STYLE, {
+          callbacks: {
+            label: function(item) {
+              var pct = total ? Math.round((item.parsed.x / total) * 100) : 0;
+              return '  ' + item.parsed.x + ' employees (' + pct + '%)';
+            }
+          }
+        }),
       },
       scales: {
-        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { stepSize: 1 } },
-        y: { grid: { display: false } },
+        x: {
+          grid: { color: 'rgba(255,255,255,0.03)', drawTicks: false },
+          border: { display: false },
+          ticks: { color: '#475569', font: { size: 10 }, padding: 6, stepSize: 1 },
+        },
+        y: {
+          grid: { display: false },
+          border: { display: false },
+          ticks: { color: '#94a3b8', font: { size: 12, weight: '600' }, padding: 8 },
+        },
       },
     },
   });

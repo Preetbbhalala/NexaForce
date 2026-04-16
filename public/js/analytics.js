@@ -39,9 +39,21 @@ function showToast(msg, type) {
 })();
 
 /* ── Chart defaults ── */
-Chart.defaults.color       = '#94a3b8';
-Chart.defaults.borderColor = 'rgba(255,255,255,0.07)';
+Chart.defaults.color       = '#64748b';
+Chart.defaults.borderColor = 'rgba(255,255,255,0.04)';
 Chart.defaults.font.family = 'Poppins, sans-serif';
+Chart.defaults.font.size   = 11;
+
+var TOOLTIP_STYLE = {
+  backgroundColor: 'rgba(7,7,22,0.97)',
+  titleColor:      '#f1f5f9',
+  bodyColor:       '#94a3b8',
+  borderColor:     'rgba(124,58,237,0.4)',
+  borderWidth:     1,
+  cornerRadius:    10,
+  padding:         12,
+  displayColors:   false,
+};
 
 const chartInstances = {};
 
@@ -54,11 +66,8 @@ function destroyChart(id) {
 
 /* ── KPIs ── */
 function renderKPIs(data) {
-  const { byDept, totalPayroll } = data;
+  const { byDept } = data;
 
-  // Total payroll
-  const payroll = totalPayroll || (byDept && byDept.reduce
-    ? 0 : 0);
   document.getElementById('kpiPayroll').textContent =
     '$' + Math.round(data.totalPayroll || 0).toLocaleString();
 
@@ -92,29 +101,34 @@ function renderSalaryByDept(byDept) {
         datasets: [{
           label: 'Avg Salary',
           data: values,
-          backgroundColor: colors.map(c => c + '55'),
+          backgroundColor: colors.map(c => c + '66'),
           borderColor: colors,
-          borderWidth: 2,
-          borderRadius: 6,
+          borderWidth: 0,
+          borderRadius: { topRight: 8, bottomRight: 8 },
+          borderSkipped: false,
         }],
       },
       options: {
         indexAxis: 'y',
         responsive: true,
+        animation: { duration: 900, easing: 'easeOutQuart' },
         plugins: {
           legend: { display: false },
-          tooltip: {
-            callbacks: {
-              label: ctx => ' $' + ctx.parsed.x.toLocaleString(),
-            },
-          },
+          tooltip: Object.assign({}, TOOLTIP_STYLE, {
+            callbacks: { label: ctx => '  $' + ctx.parsed.x.toLocaleString() + ' avg' },
+          }),
         },
         scales: {
           x: {
-            grid: { color: 'rgba(255,255,255,0.05)' },
-            ticks: { callback: v => '$' + (v / 1000).toFixed(0) + 'k' },
+            grid: { color: 'rgba(255,255,255,0.03)', drawTicks: false },
+            border: { display: false },
+            ticks: { color: '#475569', font: { size: 10 }, callback: v => '$' + (v / 1000).toFixed(0) + 'k' },
           },
-          y: { grid: { display: false } },
+          y: {
+            grid: { display: false },
+            border: { display: false },
+            ticks: { color: '#94a3b8', font: { size: 11, weight: '600' }, padding: 8 },
+          },
         },
       },
     }
@@ -138,20 +152,32 @@ function renderHeadcount(byDept) {
         datasets: [{
           label: 'Employees',
           data: values,
-          backgroundColor: colors.map(c => c + '66'),
+          backgroundColor: colors.map(c => c + '77'),
           borderColor: colors,
-          borderWidth: 2,
-          borderRadius: 8,
+          borderWidth: 0,
+          borderRadius: { topLeft: 8, topRight: 8 },
+          borderSkipped: false,
         }],
       },
       options: {
         responsive: true,
-        plugins: { legend: { display: false } },
+        animation: { duration: 900, easing: 'easeOutQuart' },
+        plugins: {
+          legend: { display: false },
+          tooltip: Object.assign({}, TOOLTIP_STYLE, {
+            callbacks: { label: ctx => '  ' + ctx.parsed.y + ' employees' }
+          }),
+        },
         scales: {
-          x: { grid: { display: false } },
+          x: {
+            grid: { display: false },
+            border: { display: false },
+            ticks: { color: '#94a3b8', font: { size: 10 } },
+          },
           y: {
-            grid: { color: 'rgba(255,255,255,0.05)' },
-            ticks: { stepSize: 1 },
+            grid: { color: 'rgba(255,255,255,0.03)', drawTicks: false },
+            border: { display: false },
+            ticks: { color: '#475569', font: { size: 10 }, stepSize: 1, padding: 6 },
           },
         },
       },
@@ -163,15 +189,15 @@ function renderHeadcount(byDept) {
 function renderTrend(monthlyHires) {
   destroyChart('trendChart');
 
-  // Build last-12-months labels
-  const labels = [];
+  const shortLabels = [];
+  const fullLabels  = [];
   const now = new Date();
   for (let i = 11; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    labels.push(d.toLocaleDateString('en-CA', { month: 'short', year: '2-digit' }));
+    shortLabels.push(d.toLocaleDateString('en-US', { month: 'short' }));
+    fullLabels.push(d.toLocaleDateString('en-CA', { month: 'short', year: '2-digit' }));
   }
 
-  // Map API data onto labels
   const hireMap = {};
   (monthlyHires || []).forEach(item => {
     const key = new Date(item._id.year, item._id.month - 1, 1)
@@ -179,38 +205,59 @@ function renderTrend(monthlyHires) {
     hireMap[key] = item.count;
   });
 
-  const values = labels.map(l => hireMap[l] || 0);
+  const values = fullLabels.map(l => hireMap[l] || 0);
+  const canvas = document.getElementById('trendChart');
+  const ctx2   = canvas.getContext('2d');
+  const grad   = ctx2.createLinearGradient(0, 0, 0, 200);
+  grad.addColorStop(0,   'rgba(124,58,237,0.4)');
+  grad.addColorStop(0.6, 'rgba(124,58,237,0.1)');
+  grad.addColorStop(1,   'rgba(124,58,237,0.0)');
 
-  chartInstances['trendChart'] = new Chart(
-    document.getElementById('trendChart'),
-    {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [{
-          label: 'New Hires',
-          data: values,
-          borderColor: '#7c3aed',
-          backgroundColor: 'rgba(124,58,237,0.15)',
-          pointBackgroundColor: '#7c3aed',
-          pointRadius: 5,
-          tension: 0.4,
-          fill: true,
-        }],
+  chartInstances['trendChart'] = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels: shortLabels,
+      datasets: [{
+        label: 'New Hires',
+        data: values,
+        borderColor: '#8b5cf6',
+        backgroundColor: grad,
+        pointBackgroundColor: '#8b5cf6',
+        pointBorderColor: '#070716',
+        pointBorderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 7,
+        tension: 0.45,
+        fill: true,
+        borderWidth: 2.5,
+      }],
+    },
+    options: {
+      responsive: true,
+      animation: { duration: 900, easing: 'easeOutQuart' },
+      plugins: {
+        legend: { display: false },
+        tooltip: Object.assign({}, TOOLTIP_STYLE, {
+          callbacks: {
+            title: (items) => fullLabels[items[0].dataIndex],
+            label: (item) => '  New hires: ' + item.parsed.y,
+          }
+        }),
       },
-      options: {
-        responsive: true,
-        plugins: { legend: { display: false } },
-        scales: {
-          x: { grid: { color: 'rgba(255,255,255,0.05)' } },
-          y: {
-            grid: { color: 'rgba(255,255,255,0.05)' },
-            ticks: { stepSize: 1 },
-          },
+      scales: {
+        x: {
+          grid: { color: 'rgba(255,255,255,0.03)', drawTicks: false },
+          border: { display: false },
+          ticks: { color: '#475569', font: { size: 10 }, maxRotation: 0 },
+        },
+        y: {
+          grid: { color: 'rgba(255,255,255,0.03)', drawTicks: false },
+          border: { display: false },
+          ticks: { color: '#475569', font: { size: 10 }, stepSize: 1, padding: 6 },
         },
       },
-    }
-  );
+    },
+  });
 }
 
 /* ── Salary Distribution (bar) ── */
@@ -220,8 +267,6 @@ function renderSalaryDist(salaryRanges) {
   const rangeLabels = ['< $50k', '$50–75k', '$75–100k', '$100–125k', '$125k+'];
   const rangeColors = ['#ef4444', '#f59e0b', '#06b6d4', '#7c3aed', '#ec4899'];
 
-  // salaryRanges is an array from $bucket: [{_id: 0, count:x}, {_id: 50000,...}, ...]
-  // Map to our 5 buckets in order
   const counts = [0, 0, 0, 0, 0];
   (salaryRanges || []).forEach(r => {
     const id = r._id;
@@ -241,20 +286,32 @@ function renderSalaryDist(salaryRanges) {
         datasets: [{
           label: 'Employees',
           data: counts,
-          backgroundColor: rangeColors.map(c => c + '66'),
+          backgroundColor: rangeColors.map(c => c + '77'),
           borderColor: rangeColors,
-          borderWidth: 2,
-          borderRadius: 8,
+          borderWidth: 0,
+          borderRadius: { topLeft: 8, topRight: 8 },
+          borderSkipped: false,
         }],
       },
       options: {
         responsive: true,
-        plugins: { legend: { display: false } },
+        animation: { duration: 900, easing: 'easeOutQuart' },
+        plugins: {
+          legend: { display: false },
+          tooltip: Object.assign({}, TOOLTIP_STYLE, {
+            callbacks: { label: ctx => '  ' + ctx.parsed.y + ' employees' }
+          }),
+        },
         scales: {
-          x: { grid: { display: false } },
+          x: {
+            grid: { display: false },
+            border: { display: false },
+            ticks: { color: '#94a3b8', font: { size: 10 } },
+          },
           y: {
-            grid: { color: 'rgba(255,255,255,0.05)' },
-            ticks: { stepSize: 1 },
+            grid: { color: 'rgba(255,255,255,0.03)', drawTicks: false },
+            border: { display: false },
+            ticks: { color: '#475569', font: { size: 10 }, stepSize: 1, padding: 6 },
           },
         },
       },
